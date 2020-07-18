@@ -1,4 +1,4 @@
-The code that was used to run the experiments for "DeBayes: a Bayesian Method for Debiasing Network Embeddings", a paper that was accepted at ICML 2020.
+The code that was originally used to run the experiments for "DeBayes: a Bayesian Method for Debiasing Network Embeddings", a paper that was accepted at ICML 2020. Further development may be done in the future and bugs will be fixed. If you have any questions or concerns, feel free to report it here or send an email to 'maarten.buyl@ugent.be'. 
 
 ## Use
 An example of how the DeBayes code can be used for the Movielens 100k dataset is given in main_example.py. Important functions and class constructors are also documented. Please take a look at the DeBayes constructor and fit function documentation!
