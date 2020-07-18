@@ -1,13 +1,21 @@
+# Author: Maarten Buyl
+# Contact: maarten.buyl@ugent.be
+# Date: 17/07/2020
+
+
 from os.path import join, dirname, abspath
 import numpy as np
-import sklearn as sk
+from sklearn import metrics, linear_model, model_selection, pipeline, preprocessing
 
 from debayes import DeBayes
 
 
 def movielens_example():
+    random_seed = 0
+    np.random.seed(random_seed)
+
     # Load the movielens 100k ratings.
-    dataset_path = join(dirname(abspath(__file__)), 'movielens100k_data')
+    dataset_path = join(dirname(abspath(__file__)), 'data')
     with open(join(dataset_path, 'u.data'), mode='r', encoding='ISO-8859-1') as file_name:
         ratings = np.genfromtxt(file_name, delimiter='\t', autostrip=True, dtype=str)
 
@@ -60,21 +68,21 @@ def movielens_example():
     # Create the DeBayes class.
     debayes = DeBayes(
         dimension=8,
-        s1=0.7,
-        s2=1,
+        s1=1,
+        s2=16,
         subsample=None,
         learning_rate=1e-1,
         nb_epochs=1000,
         training_prior_type='biased_degree',
         eval_prior_type='degree',
         sensitive_attributes=['gender', 'age', 'occupation'],
-        dump_priors=False,
+        dump_pickles=False,
         load_pickles=False,
         dataset_name="ml-100k"
     )
 
     # Fit on the training data and all attributes (including partition numbers for every node)
-    debayes.fit(train_data=train_edges, attributes=attributes, random_seed=None)
+    debayes.fit(train_data=train_edges, attributes=attributes, random_seed=random_seed)
 
     ######
     # Section: measure AUC.
@@ -83,8 +91,8 @@ def movielens_example():
     test_data = np.concatenate((test_edges_pos, test_edges_neg))
     test_labels = np.concatenate((test_labels_pos, test_labels_neg))
 
-    debayes.predict(test_data)
-    test_score = sk.metrics.roc_auc_score(test_labels, test_data)
+    predictions = debayes.predict(test_data)
+    test_score = metrics.roc_auc_score(test_labels, predictions)
     print("The TEST AUC score is {}.".format(test_score))
 
     ######
@@ -95,19 +103,19 @@ def movielens_example():
     Y = np.array([attributes[user]['gender'] for user in users])
 
     # Split the embeddings into train and test examples.
-    X_train, X_test, Y_train, Y_test = sk.model_selection.train_test_split(X, Y, test_size=0.2, stratify=Y)
+    X_train, X_test, Y_train, Y_test = model_selection.train_test_split(X, Y, test_size=0.2, stratify=Y)
 
-    logi_reg = sk.model_selection.GridSearchCV(sk.pipeline.Pipeline([
-        ('scaler', sk.preprocessing.StandardScaler()),
-        ('logi', sk.linear_model.LogisticRegression(multi_class='multinomial', solver='saga', max_iter=1000))
+    logi_reg = model_selection.GridSearchCV(pipeline.Pipeline([
+        ('scaler', preprocessing.StandardScaler()),
+        ('logi', linear_model.LogisticRegression(multi_class='multinomial', solver='saga', max_iter=1000))
     ]), param_grid={'logi__C': 100. ** np.arange(-2, 3), 'logi__penalty': ['l1', 'l2']}, cv=3,
         scoring='roc_auc')
 
-    logi_reg.fit(X_train, X_test)
+    logi_reg.fit(X_train, Y_train)
     clf = logi_reg.best_estimator_
 
     clf.fit(X_train, Y_train)
-    test_score = sk.metrics.get_scorer('roc_auc')(clf, X_test, Y_test)
+    test_score = metrics.get_scorer('roc_auc')(clf, X_test, Y_test)
     print("The TEST AUC for predicting gender is {}.".format(test_score))
 
 

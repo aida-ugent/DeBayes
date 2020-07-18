@@ -1,3 +1,12 @@
+# Author: Maarten Buyl
+# Contact: maarten.buyl@ugent.be
+# Date: 17/07/2020
+#
+# The code is based on the original implementation of:
+# Conditional Network Embeddings (CNE) (Copyright (c) Ghent University)
+# by Bo Kang (bo.kang@ugent.be)
+
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -114,7 +123,7 @@ class ConditionalNetworkEmbedding:
         v_prev = np.zeros_like(X)
 
         s_diff = (1/self.s1**2 - 1/self.s2**2)
-        s_div = (self.s1 / self.s2)**self.d
+        s_div = self.s1 / self.s2
 
         for epoch in tqdm(range(num_epochs), position=0, leave=True):
             obj, grad = self.__eval_obj_grad(X, A, s_diff, s_div)
@@ -199,7 +208,7 @@ class ConditionalNetworkEmbedding:
             not_tiny[tiny_priors] = False
 
             s_diff = (1 / self.s1 ** 2 - 1 / self.s2 ** 2)
-            s_div = (self.s1 / self.s2)**self.d
+            s_div = self.s1 / self.s2
             u_predictions[not_tiny] = self.__compute_posterior(u, neighbours[not_tiny], s_diff, s_div)
 
             predictions.extend(u_predictions)

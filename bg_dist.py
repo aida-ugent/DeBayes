@@ -1,3 +1,8 @@
+# Author: Maarten Buyl
+# Contact: maarten.buyl@ugent.be
+# Date: 17/07/2020
+
+
 import time
 import numpy as np
 from tqdm import tqdm

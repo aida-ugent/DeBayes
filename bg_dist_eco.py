@@ -1,3 +1,8 @@
+# Author: Maarten Buyl
+# Contact: maarten.buyl@ugent.be
+# Date: 17/07/2020
+
+
 import numpy as np
 from bg_dist import BgDist, newton_optimization, Lambdas, RowDegreeLambdas, ColumnDegreeLambdas, LambdasAggregator
 
@@ -155,4 +160,3 @@ class LambdasAggregatorEco(LambdasAggregator):
         mapped_col_idx = self._col_idx_to_uni[col_idx]
         E = self.E(row_idx=mapped_row_idx, col_idx=mapped_col_idx)
         return E / self._Z(E)
-
