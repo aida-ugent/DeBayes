@@ -1,5 +1,2 @@
-The used datasets were not included in this submission, but they can be downloaded here:
+The used datasets were not included in this submission, but the Movielens dataset can be downloaded here:
 - ml-100k: https://grouplens.org/datasets/movielens/100k/
-- dblp: https://www.aminer.cn/citation -> download 'DBLP-Citation-network V11' -> run separate_scripts/load_dblp_data and
-copy the new data files to the datasets folder.
-- polblogs: http://www-personal.umich.edu/~mejn/netdata/ -> "Political blogs"
