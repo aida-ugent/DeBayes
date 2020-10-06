@@ -57,6 +57,7 @@ class BgDist:
         # If no block structure is given, then simply treat this class as the only distribution.
         if block_mask is None:
             self._fit(A, **kwargs)
+            return
 
         block_types = np.unique(block_mask)
         nb_blocks = block_types.shape[0]
@@ -66,6 +67,7 @@ class BgDist:
         # If there is only one block, treat the problem as if there are no blocks.
         if nb_blocks == 1:
             self._fit(A, **kwargs)
+            return
 
         self.__block_mask = block_mask
         self.__row_id_to_block_idx = np.empty_like(block_mask, dtype=np.int)
