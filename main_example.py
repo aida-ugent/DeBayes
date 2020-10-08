@@ -30,8 +30,19 @@ def movielens_example():
     train_edges = edges[:int(0.8 * edges.shape[0])]
     test_edges_pos = edges[int(0.8 * edges.shape[0]):]
 
+    # Find all node ids that exist in the positive test set, but not in the train set.
+    train_ids = np.unique(train_edges)
+    test_ids = np.unique(test_edges_pos)
+    ids_to_filter = np.setdiff1d(test_ids, train_ids)
+
+    # Remove all edges with those node ids from the data.
+    test_rows_to_filter = np.any(np.isin(test_edges_pos, ids_to_filter), axis=1)
+    test_edges_pos = test_edges_pos[np.logical_not(test_rows_to_filter)]
+    total_rows_to_filter = np.any(np.isin(edges, ids_to_filter), axis=1)
+    edges = edges[np.logical_not(total_rows_to_filter)]
+
     # Generate some test edges that do not exist in the data. They are 'negative' edges.
-    test_edges_neg = generate_negative_edges(edges)
+    test_edges_neg = generate_negative_edges(edges, nb_negative_samples=test_edges_pos.shape[0])
     del edges
 
     # Parse the user file to get the user attributes.
@@ -109,24 +120,23 @@ def movielens_example():
         ('scaler', preprocessing.StandardScaler()),
         ('logi', linear_model.LogisticRegression(multi_class='multinomial', solver='saga', max_iter=1000))
     ]), param_grid={'logi__C': 100. ** np.arange(-2, 3), 'logi__penalty': ['l1', 'l2']}, cv=3,
-        scoring='roc_auc')
+        scoring='roc_auc_ovr_weighted')
 
     logi_reg.fit(X_train, Y_train)
     clf = logi_reg.best_estimator_
 
     clf.fit(X_train, Y_train)
-    test_score = metrics.get_scorer('roc_auc')(clf, X_test, Y_test)
+    test_score = metrics.get_scorer('roc_auc_ovr_weighted')(clf, X_test, Y_test)
     print("The TEST AUC for predicting gender is {}.".format(test_score))
 
 
-def generate_negative_edges(data):
+def generate_negative_edges(data, nb_negative_samples):
     lhs_ids = np.unique(data[:, 0])
     rhs_ids = np.unique(data[:, 1])
     nb_lhs_ids = lhs_ids.shape[0]
     nb_rhs_ids = rhs_ids.shape[0]
     lhs_id_to_idx = dict(zip(lhs_ids, np.arange(nb_lhs_ids)))
     rhs_id_to_idx = dict(zip(rhs_ids, np.arange(nb_rhs_ids)))
-    nb_negative_samples = data.shape[0]
 
     # Find linear indexes for the data in a simplified, 0-indexed matrix.
     simplified_data = np.array([(lhs_id_to_idx[edge[0]], rhs_id_to_idx[edge[1]]) for edge in data])
@@ -145,7 +155,7 @@ def generate_negative_edges(data):
         actual_negative_lin_idx = np.setdiff1d(candidate_lin_idx, data_lin_idx)
 
         # Keep the actually negative samples.
-        actual_negative_samples = np.unravel_index(actual_negative_lin_idx, dims=(nb_lhs_ids, nb_rhs_ids))
+        actual_negative_samples = np.unravel_index(actual_negative_lin_idx, shape=(nb_lhs_ids, nb_rhs_ids))
 
         # Before storing them, convert the indices to ids.
         sampled_lhs_ids = lhs_ids[actual_negative_samples[0]]
