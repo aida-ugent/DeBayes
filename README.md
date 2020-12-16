@@ -16,11 +16,14 @@ The Movielens dataset was not included, but it may be downloaded here: https://g
 
 
 
-If you found this method useful in your work, please cite our paper. The proceedings of our ICML submission are not available yet, but you can cite the Arxiv version for now: 
+If you found this method useful in your work, please cite our paper:
 
-    @article{buyl2020debayes,
-        title={DeBayes: a Bayesian method for debiasing network embeddings},
+    @inproceedings{buyl2020debayes,
+        title={DeBayes: a Bayesian Method for Debiasing Network Embeddings},
         author={Buyl, Maarten and De Bie, Tijl},
-        journal={arXiv preprint arXiv:2002.11442},
+        booktitle={International Conference on Machine Learning},
+        series={Proceedings of Machine Learning Research},
+        volume={119},
+        pages={1220--1229},
         year={2020}
     }
